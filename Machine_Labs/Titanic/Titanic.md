@@ -4,7 +4,7 @@
 ### Link: https://app.hackthebox.com/machines/Titanic
 -----------------------------------------------------------
 
-### Recon:
+### RECON:
 + Scan the open port in the machine:
 ```bash
 $ nmap -sV -vv -A -T4 -p- titanic.htb
