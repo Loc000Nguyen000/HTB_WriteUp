@@ -1,5 +1,5 @@
 ## HackTheBox Machine
-![alt text](image.png)
+![alt text](/Machine_Labs/Titanic/Images/image.png)
 
 ### Link: https://app.hackthebox.com/machines/Titanic
 -----------------------------------------------------------
@@ -55,7 +55,7 @@ $ ./ffuf -u 'http://titanic.htb/' -H 'Host: FUZZ.titanic.htb' -w /usr/share/SecL
 + Access repo `flask-app` which is the source code of main page `Titanic Booking System`.
 + Reviewing the source code app.py, we've found out the potential feature has the vulnerability:
 
-![alt text](image-1.png)
+![alt text](/Machine_Labs/Titanic/Images/image-1.png)
 
 --> We are able to inject the every file-path we want into the parameter `ticket` because the method `json_filepath` is not filtering the directory-path `TICKETS_DIR`.
 
@@ -64,44 +64,44 @@ $ ./ffuf -u 'http://titanic.htb/' -H 'Host: FUZZ.titanic.htb' -w /usr/share/SecL
 + Back to the main page `Titanic - Book your ship ticket` and exploit the vulne the feature `/download` the ticket.
 + We use BurpSuite to capture the request and exploit. We try with `/etc/passwd`.
 
-![alt text](image-2.png)
+![alt text](/Machine_Labs/Titanic/Images/image-2.png)
 
 ### Gain the inital machine:
 + We access another repo of Developer `docker-config`. We find out the 2 folder `gitea` and `mysql`.
 + Access `/gitea/docker-compose.yml`:
 
-![alt text](image-3.png)
+![alt text](/Machine_Labs/Titanic/Images/image-3.png)
 
 + We've seen the comment the file-path so we try to access the path `/home/developer/gitea/data`.
 
-![alt text](image-4.png)
+![alt text](/Machine_Labs/Titanic/Images/image-4.png)
 
 + Now we continue fuzzing the available directories:
 
-![alt text](image-5.png)
+![alt text](/Machine_Labs/Titanic/Images/image-5.png)
 
 --> We've had 2 available directories: `git` and `ssh`.
 
 + After enumerating the `/git` and `/ssh`, we've found the potential directory `git/.ssh/environment`:
 
-![alt text](image-7.png)
+![alt text](/Machine_Labs/Titanic/Images/image-7.png)
 
 --> The hidden directory `/data/gitea`. Back to origin file-path and try to access.
 
 + Try to access the hidden directory:
 
-![alt text](image-6.png)
+![alt text](/Machine_Labs/Titanic/Images/image-6.png)
 
 + Researching about the document of [Gitea](https://docs.gitea.com/administration/config-cheat-sheet#database-database) and we found the cheat sheet of Gitea.
 + In the `Configuration Cheat Sheet`, we found the section `PATH` which is path access the database `SQLite` of Gitea:
 
-![alt text](image-8.png)
+![alt text](/Machine_Labs/Titanic/Images/image-8.png)
 
 --> `PATH`: `data/gitea.db`.
 
 + Access the path:
 
-![alt text](image-9.png)
+![alt text](/Machine_Labs/Titanic/Images/image-9.png)
 
 --> Download the file .db and open it with SQLite.
 
@@ -185,17 +185,17 @@ crack_password(username, wordlist_file, salt_hex, stored_hash_hex, iterations, d
 + In the first, we crack with user `administrator` but not work so we just crack the user `developer`.
 + Run file and we have the password to login SSH:
 
-![alt text](image-10.png)
+![alt text](/Machine_Labs/Titanic/Images/image-10.png)
 
 + Login SSH:
 
-![alt text](image-11.png)
+![alt text](/Machine_Labs/Titanic/Images/image-11.png)
 
 
 ### Privilege Escalation:
 + After seeing around all directories, we found out the potential file in `/opt`.
 
-![alt text](image-12.png)
+![alt text](/Machine_Labs/Titanic/Images/image-12.png)
 
 + We can execute file .sh without sudo. Checking the code of file .sh:
 
@@ -237,10 +237,10 @@ lrwxrwxrwx 1 root root 15 Mar 24  2022 /usr/lib/x86_64-linux-gnu/libxcb.so.1 -> 
 
 + Compile the code into a shared object at the location `/opt/app/static/assets/images` where the file `identify_images.sh` execute.
 
-![alt text](image-13.png)
+![alt text](/Machine_Labs/Titanic/Images/image-13.png)
 
 + Use netcat to capture reverse shell.
 
-![alt text](image-14.png)
+![alt text](/Machine_Labs/Titanic/Images/image-14.png)
 
 -------------------------------------------

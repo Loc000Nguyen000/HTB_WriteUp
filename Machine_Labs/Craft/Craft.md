@@ -1,5 +1,5 @@
 ## HackTheBox Machine
-![alt text](image.png)
+![alt text](/Machine_Labs/Craft/Images/image.png)
 
 ### Link: https://app.hackthebox.com/machines/Craft
 -------------------------------------------------------
@@ -39,19 +39,19 @@ PORT     STATE SERVICE  REASON  VERSION
 + Go each page one by one, we've found some interesting things. In the page `Gogs`, we saw the repo `craft-api` with developers.
 + Looking around account of developers, we've found the commit of user `dinesh` about the bug of API:
 
-![alt text](image-1.png)
+![alt text](/Machine_Labs/Craft/Images/image-1.png)
 
 --> We found the dinesh user's password for the API: `'dinesh', '4aUh0A8PbVJxgd'`.
 
 + We can use the credential to login API:
 
-![alt text](image-2.png)
+![alt text](/Machine_Labs/Craft/Images/image-2.png)
 
 --> Get the token to login. We can use it to check later.
 
-![alt text](image-4.png)
+![alt text](/Machine_Labs/Craft/Images/image-4.png)
 
-![alt text](image-5.png)
+![alt text](/Machine_Labs/Craft/Images/image-5.png)
 
 + Back to the first commit, we check the source code `brew.py`:
 
@@ -119,14 +119,14 @@ to disable the error certification
 
 + Now run file test.py and open netcat to capture the shell:
 
-![alt text](image-6.png)
+![alt text](/Machine_Labs/Craft/Images/image-6.png)
 
-![alt text](image-7.png)
+![alt text](/Machine_Labs/Craft/Images/image-7.png)
 
 ### Finding SSH credenials through Mysql database:
 + In the file `settings.py`, we found the credential user of database:
 
-![alt text](image-8.png)
+![alt text](/Machine_Labs/Craft/Images/image-8.png)
 
 --> We've had `User`, `Password`, `DB`, `Host`.
 
@@ -142,7 +142,7 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 10.10.10.110 - - [09/Mar/2025 14:27:22] "GET /dbtest.py HTTP/1.1" 200 -
 ```
 
-![alt text](image-9.png)
+![alt text](/Machine_Labs/Craft/Images/image-9.png)
 
 + We can check file edited:
 ```python
@@ -173,7 +173,7 @@ finally:
 
 + Run `dbtest.py`:
 
-![alt text](image-10.png)
+![alt text](/Machine_Labs/Craft/Images/image-10.png)
 
 + Now we change query to extract users:
 
@@ -187,20 +187,20 @@ finally:
 
 + Run `dbtest.py` again:
 
-![alt text](image-11.png)
+![alt text](/Machine_Labs/Craft/Images/image-11.png)
 
 --> We use the credential user `gilfoyle` to login git service `gogs`.
 
 + Login `gogs` we found the gilfoyle's repo name `craft-infra`.
 + Check repo we had key .ssh/id_rsa to login SSH. Save key to machine and login SSH.
 
-![alt text](image-12.png)
+![alt text](/Machine_Labs/Craft/Images/image-12.png)
 
 ### Privilege Escalation:
 + Check again repo `craft-infra`, we've checked secret file `secrets.sh` in /vault.
 + Read it and we guess we can use it to privilege escalation.
 
-![alt text](image-13.png)
+![alt text](/Machine_Labs/Craft/Images/image-13.png)
 
 + Research about `vault` and `ssh`, we found the way call `One-time SSH passwords`. [Read it!!!](https://developer.hashicorp.com/vault/docs/secrets/ssh/one-time-ssh-passwords).
 
@@ -208,5 +208,5 @@ finally:
 
 + Run CLI and we get the root:
 
-![alt text](image-14.png)
+![alt text](/Machine_Labs/Craft/Images/image-14.png)
 -----------------------------------------------------------
