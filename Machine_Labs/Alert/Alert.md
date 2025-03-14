@@ -173,4 +173,4 @@ and file `configuration.php` is same.
 
 ![alt text](/Machine_Labs/Alert/Images/image-20.png)
 
-
+---------------------------------------------------------------------------------------------------
