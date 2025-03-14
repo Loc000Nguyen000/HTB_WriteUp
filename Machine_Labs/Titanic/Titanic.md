@@ -1,5 +1,5 @@
 ## HackTheBox Machine
-![alt text](Titanic.png)
+<img src="Titanic.png" alt="Alt Text" width="450" height="300" />
 
 ### Link: https://app.hackthebox.com/machines/Titanic
 -----------------------------------------------------------
