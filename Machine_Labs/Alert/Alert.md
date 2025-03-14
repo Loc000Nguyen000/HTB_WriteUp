@@ -1,5 +1,5 @@
 ## HackTheBox Machine
-![alt text](image.png)
+![alt text](/Machine_Labs/Alert/Images/image.png)
 
 ### Link: https://app.hackthebox.com/machines/Alert
 -------------------------------------------------------
@@ -54,19 +54,19 @@ Finished
 ```bash
 $ ./ffuf -u 'http://alert.htb' -H 'Host: FUZZ.alert.htb' -w /usr/share/SecLists/Discovery/DNS/subdomains-top1million-20000.txt -mc all -t 100 -fc 301
 ```
-![alt text](image-1.png)
+![alt text](/Machine_Labs/Alert/Images/image-1.png)
 
 ### XSS VULN:
 + In page `alert` - Markdown Viewer, we upload file `.md`. After checking all potential parameters can be XSS, we've found out that we can inject payload into file `.md` to pop up the alert XSS when view markdown.
 + We've prepared the payload `<script>alert(document.domain)</script>` and upload file `.md` to view markdown:
 
-![alt text](image-3.png)
+![alt text](/Machine_Labs/Alert/Images/image-3.png)
 
 --> It work and the vuln XSS exist.
 
 + Check another pages, we notice in page `About us`:
 
-![alt text](image-4.png)
+![alt text](/Machine_Labs/Alert/Images/image-4.png)
 
 --> It means that when we send contact messages and report then admin account will be auto checked. We can send messages in page `Contact` and capture the action of account administrators. Using the XSS Vuln to retrive sensitive information.
 
@@ -95,19 +95,19 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 
 + Upload the payload `.md`, after upload normal we choose `Share Mardown` and get the share link:
 
-![alt text](image-5.png)
+![alt text](/Machine_Labs/Alert/Images/image-5.png)
 
 + Copy the `link_share` and send it in `Contact`:
 
-![alt text](image-6.png)
+![alt text](/Machine_Labs/Alert/Images/image-6.png)
 
 + After send it, we will check the local server will capture the action:
 
-![alt text](image-7.png)
+![alt text](/Machine_Labs/Alert/Images/image-7.png)
 
 + Decode the capture and we see the potential information:
 
-![alt text](image-8.png)
+![alt text](/Machine_Labs/Alert/Images/image-8.png)
 
 --> Now we can see the hidden direct `Messages` and notice the line `<h1>Messages</h1><ul><li><a href='messages.php?file=2024-03-10_15-48-34.txt'>2024-03-10_15-48-34.txt</a></li></ul>`. We are able to access the messages.php with parameter `file` to read deeper.
 
@@ -115,53 +115,62 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 + We've known the file contain password we can find in root file that is `.htpasswd`. Combine with `Path Traversal` we'had the full path: `http://alert.htb/messages.php?file=../../../../../var/www/statistics.alert.htb/.htpasswd`.
 + Edit payload, get the link_share, send it and capture again:
 
-![alt text](image-9.png)
+![alt text](/Machine_Labs/Alert/Images/image-9.png)
 
 + Decode the capture:
 
-![alt text](image-10.png)
+![alt text](/Machine_Labs/Alert/Images/image-10.png)
 
 + Crack the passwd. Put the full hash `$apr1$bMoRBJOg$igG8WBtQ1xYDTQdLjSWZQ/` in file .txt and use tool JohnTheRipper or Hashcat to bruteforce it:
 
-![alt text](image-2.png)
+![alt text](/Machine_Labs/Alert/Images/image-2.png)
 
 --> We've had credential `albert:machesterunited`.
 
 + Login SSH:
 
-![alt text](image-11.png)
+![alt text](/Machine_Labs/Alert/Images/image-11.png)
 
 ### PRIVILEGE ESCALATION:
 + We can not run sudo. Using tool to enumerate vector priv and found the server port 8080 run local:
 
-![alt text](image-12.png)
+![alt text](/Machine_Labs/Alert/Images/image-12.png)
 
 + Check again `/opt`, we've known server is running port 8080 is `webstie-monitor`:
 
-![alt text](image-13.png)
+![alt text](/Machine_Labs/Alert/Images/image-13.png)
 
 + Website is monitoring 2 pages `alert.htb` and `statistics.alert.htb`:
 
-![alt text](image-14.png)
+![alt text](/Machine_Labs/Alert/Images/image-14.png)
 
 + Curl port 8080 we can read it but can not access directly:
 
-![alt text](image-15.png)
+![alt text](/Machine_Labs/Alert/Images/image-15.png)
 
 + We can use `Tunnel` to access port 8080. With myself, we use tool [Chisel](https://github.com/jpillora/chisel) to create TCP tunnel over HTTP to access port 8080.
 
 + In the attack machine, we open listener:
 
-![alt text](image-16.png)
+![alt text](/Machine_Labs/Alert/Images/image-16.png)
 
 + In target machine, we open:
 
-![alt text](image-18.png)
+![alt text](/Machine_Labs/Alert/Images/image-18.png)
 
 + Now we can access the page port 8080:
 
-![alt text](image-19.png)
+![alt text](/Machine_Labs/Alert/Images/image-19.png)
 
++ we can read /monitors/alert.htb:
 
+![alt text](/Machine_Labs/Alert/Images/image-17.png)
+
++ Back again /opt/website-monitors, we've seen the potential directory `config`. The directory `config` can execute with both priv `root` and `management`
+and file `configuration.php` is same. 
++ Check file `configuration.php` and we can overwrite it so we can create revershell and capture root. We will use payload webshell [PHP PentestMonkey](https://raw.githubusercontent.com/pentestmonkey/php-reverse-shell/master/php-reverse-shell.php).
++ Edit file and save it. When save file, `configuration.php` will be auto executed and use Netcat to capture the revershell:
+
+![alt text](/Machine_Labs/Alert/Images/image-20.png)
 
 
