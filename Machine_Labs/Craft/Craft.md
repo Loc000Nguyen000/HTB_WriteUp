@@ -1,5 +1,5 @@
 ## HackTheBox Machine
-![alt text](/Machine_Labs/Craft/Images/image.png)
+<img src="Craft.png" alt="Alt Text" width="400" height="300" />
 
 ### Link: https://app.hackthebox.com/machines/Craft
 -------------------------------------------------------
