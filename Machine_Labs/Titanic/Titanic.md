@@ -1,5 +1,5 @@
 ## HackTheBox Machine
-![alt text](/Machine_Labs/Titanic/Images/image.png)
+![alt text](Titanic.png)
 
 ### Link: https://app.hackthebox.com/machines/Titanic
 -----------------------------------------------------------
